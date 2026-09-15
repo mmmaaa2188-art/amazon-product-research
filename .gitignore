@@ -4,5 +4,6 @@ out
 .env*.local
 .sites-runtime
 *.log
+*.tsbuildinfo
 .vercel
 work/
