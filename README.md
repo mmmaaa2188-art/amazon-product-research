@@ -24,3 +24,10 @@ Copy `.env.example` to `.env.local` when a Supabase project is available. The cu
 ## Deployment
 
 Import the repository into Vercel, set the two Supabase environment variables when the backend is enabled, and deploy using the standard Next.js preset.
+
+## SellerSprite MCP
+
+The server-side connector uses SellerSprite's Streamable HTTP endpoint. Configure
+`SELLERSPRITE_MCP_URL` and `SELLERSPRITE_SECRET_KEY` only in `.env.local` or Vercel
+Environment Variables. Never expose the secret in browser code or commit it to Git.
+After deployment, sign in and visit `/api/sellersprite/health` to verify connectivity.
