@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BarChart3, Box, Calculator, ChevronDown, CircleUserRound, Command, FilePenLine, LayoutDashboard, LogOut, Megaphone, Menu, PackageSearch, Search, Settings, Sparkles, X } from "lucide-react";
 import { useState } from "react";
+import { opportunities } from "@/lib/mock-data";
 
 const nav = [
   { href: "/", label: "运营驾驶舱", icon: LayoutDashboard },
@@ -18,6 +19,9 @@ const nav = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchResults = opportunities.filter((item) => `${item.productName} ${item.keyword} ${item.asin}`.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 8);
 
   return (
     <div className="min-h-screen bg-canvas">
@@ -43,10 +47,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="mt-2 flex justify-between text-xs text-[#758178]"><span>72% 已补全</span><span>126 个候选</span></div>
         </div>
         <div className="border-t border-[#dce5e0] p-3">
-          <button className="flex w-full items-center gap-3 rounded-xl p-3 text-left hover:bg-white">
+          <div className="flex w-full items-center gap-3 rounded-xl p-3 text-left">
             <span className="grid h-9 w-9 place-items-center rounded-full bg-[#e2ece7] text-forest"><CircleUserRound size={20} /></span>
-            <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold">MJC 美国站</span><span className="block truncate text-xs text-[#7a867f]">自有品牌工作区</span></span><ChevronDown size={16} />
-          </button>
+            <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold">MJC 美国站</span><span className="block truncate text-xs text-[#7a867f]">自有品牌工作区</span></span>
+          </div>
         </div>
       </aside>
       <div className="lg:pl-[268px]">
@@ -54,13 +58,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <button className="rounded-lg p-2 lg:hidden" onClick={() => setOpen(true)} aria-label="Open navigation"><Menu size={22} /></button>
           <div className="hidden items-center gap-2 text-sm text-[#748078] sm:flex"><Box size={16} /><span>MJC 运营中枢</span><span>/</span><span className="font-medium text-ink">Amazon.com</span></div>
           <div className="flex items-center gap-2">
-            <button className="hidden h-9 items-center gap-2 rounded-lg border border-[#d7e0db] bg-white px-3 text-sm text-[#68746d] shadow-sm sm:flex"><Search size={15} />全局搜索 <kbd className="ml-2 rounded bg-[#f0f3f1] px-1.5 py-0.5 text-[11px]">⌘ K</kbd></button>
-            <button className="grid h-9 w-9 place-items-center rounded-lg border border-[#d7e0db] bg-white text-[#67736c]" aria-label="设置"><Settings size={17} /></button>
+            <button type="button" onClick={() => setSearchOpen(true)} className="flex h-9 items-center gap-2 rounded-lg border border-[#d7e0db] bg-white px-3 text-sm text-[#68746d] shadow-sm"><Search size={15} />搜索选品</button>
+            <Link href="/api/sellersprite/health" className="grid h-9 w-9 place-items-center rounded-lg border border-[#d7e0db] bg-white text-[#67736c]" aria-label="检查卖家精灵连接" title="检查卖家精灵连接"><Settings size={17} /></Link>
             <form action="/api/auth/logout" method="post"><button className="grid h-9 w-9 place-items-center rounded-lg border border-[#d7e0db] bg-white text-[#67736c]" aria-label="退出登录"><LogOut size={17}/></button></form>
           </div>
         </header>
         <main>{children}</main>
       </div>
+      {searchOpen && <div className="fixed inset-0 z-50 flex items-start justify-center bg-ink/40 px-4 pt-[12vh]" onClick={() => setSearchOpen(false)}><div role="dialog" aria-modal="true" aria-label="搜索选品" className="w-full max-w-xl rounded-2xl bg-white p-5 shadow-2xl" onClick={(event) => event.stopPropagation()}><div className="flex items-center gap-3"><Search size={20} className="text-forest"/><input autoFocus value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Escape") setSearchOpen(false); }} placeholder="输入产品、关键词或 ASIN" className="h-11 flex-1 outline-none"/><button type="button" onClick={() => setSearchOpen(false)} aria-label="关闭搜索"><X size={20}/></button></div><div className="mt-3 max-h-[50vh] overflow-y-auto border-t border-[#e5ebe7] pt-2">{searchResults.map((item) => <Link key={item.id} href={`/opportunities/${item.id}`} onClick={() => setSearchOpen(false)} className="block rounded-lg px-3 py-3 hover:bg-[#f2f7f4]"><span className="block font-semibold">{item.productName}</span><span className="text-xs text-[#748078]">{item.keyword} · {item.asin}</span></Link>)}{searchResults.length === 0 && <p className="px-3 py-5 text-sm text-[#748078]">没有匹配的示例选品。</p>}</div><p className="mt-3 text-xs text-[#879189]">当前仅搜索站内示例选品，不搜索卖家精灵实时数据。</p></div></div>}
     </div>
   );
 }
